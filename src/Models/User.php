@@ -48,40 +48,6 @@ class User extends Database
         }
     }
 
-    /**
-     * NUEVO: Genera un token de invitación único y lo guarda en la BD.
-     * @return string|false El token generado o false si falla.
-     */
-    public function generateInvitationToken()
-    {
-        try {
-            $token = bin2hex(random_bytes(16)); // Genera un token seguro de 32 caracteres
-            $sql = "INSERT INTO public.invitations (token) VALUES (:token)";
-            $stmt = $this->db->prepare($sql);
-            if ($stmt->execute([':token' => $token])) {
-                return $token;
-            }
-            return false;
-        } catch (\PDOException $e) {
-            error_log('Error en generateInvitationToken: ' . $e->getMessage());
-            return false;
-        }
-    }
-    
-    /**
-     * NUEVO: Obtiene todos los tokens de invitación activos.
-     * @return array
-     */
-    public function getActiveTokens(): array
-    {
-        try {
-            $stmt = $this->db->query("SELECT token FROM public.invitations ORDER BY created_at DESC");
-            return $stmt->fetchAll(PDO::FETCH_COLUMN, 0); // Devuelve un array simple de tokens
-        } catch (\PDOException $e) {
-            error_log('Error en getActiveTokens: ' . $e->getMessage());
-            return [];
-        }
-    }
 
     public function findInvitationToken(string $token): bool
     {

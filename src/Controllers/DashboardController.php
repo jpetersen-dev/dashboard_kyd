@@ -4,7 +4,6 @@ namespace App\Controllers;
 
 use App\Models\Campaign;
 use App\Models\Contact;
-use App\Models\User; // <-- Se añade el modelo de User
 
 class DashboardController
 {
@@ -20,10 +19,8 @@ class DashboardController
 
     public function index()
     {
-        // ... (El método index no cambia, sigue cargando todos los datos la primera vez) ...
         $campaignModel = new Campaign();
         $contactModel = new Contact();
-        $userModel = new User(); // <-- Se instancia el modelo de User
 
         $allCampaigns = $campaignModel->getAllCampaigns();
         
