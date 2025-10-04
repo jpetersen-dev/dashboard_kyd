@@ -1,0 +1,8 @@
+# Ignore dependencies
+/vendor
+# Ignore node modules
+/node_modules
+# Ignore environment variables file
+.env
+# Ignore log files
+*.log

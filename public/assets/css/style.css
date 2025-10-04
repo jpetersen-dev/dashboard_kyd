@@ -1,0 +1,96 @@
+/*
+  Hoja de Estilos Principal del Proyecto.
+  Utiliza variables CSS para manejar el modo claro y oscuro.
+*/
+
+/* Define variables de color para ambos temas */
+:root {
+    --bg-light: #f1f5f9;      /* Fondo claro general */
+    --text-light: #1e293b;    /* Texto principal claro */
+    --text-sec-light: #475569; /* Texto secundario claro */
+    --card-light: #ffffff;    /* Fondo de las tarjetas claro */
+    --border-light: #e2e8f0;  /* Borde claro */
+    --row-hover-light: #f8fafc; /* Hover de filas claro */
+
+    --bg-dark: #0f172a;       /* Fondo oscuro general */
+    --text-dark: #e2e8f0;     /* Texto principal oscuro */
+    --text-sec-dark: #94a3b8;  /* Texto secundario oscuro */
+    --card-dark: #1e293b;     /* Fondo de las tarjetas oscuro */
+    --border-dark: #334155;   /* Borde oscuro */
+    --row-hover-dark: #283549;  /* Hover de filas oscuro */
+}
+
+/* Estilos para el modo claro (por defecto) */
+body {
+    background-color: var(--bg-light);
+    color: var(--text-light);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.card {
+    background-color: var(--card-light);
+    border: 1px solid var(--border-light);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+/* Estilos que se aplican cuando el HTML tiene la clase 'dark' */
+html.dark body {
+    background-color: var(--bg-dark);
+    color: var(--text-dark);
+}
+
+html.dark .card {
+    background-color: var(--card-dark);
+    border-color: var(--border-dark);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+/* Clases específicas para elementos que necesitan cambiar de color */
+html.dark .text-dynamic-primary { color: #ffffff; }
+.text-dynamic-primary { color: var(--text-light); }
+
+html.dark .text-dynamic-secondary { color: var(--text-sec-dark); }
+.text-dynamic-secondary { color: var(--text-sec-light); }
+
+html.dark .table-header { background-color: var(--border-dark); }
+.table-header { background-color: var(--bg-light); }
+
+html.dark .table-row:hover { background-color: var(--row-hover-dark); }
+.table-row:hover { background-color: var(--row-hover-light); }
+
+html.dark .border-dynamic { border-color: var(--border-dark); }
+.border-dynamic { border-color: var(--border-light); }
+
+/*
+  REGLAS ADICIONALES PARA FORZAR ESTILOS EN FORMULARIOS
+*/
+/* Para el selector de campaña en modo diurno */
+html:not(.dark) #campaignSelector {
+    background-color: var(--card-light) !important;
+    color: var(--text-light) !important;
+}
+
+/* Para el campo de notas en modo diurno */
+html:not(.dark) textarea[name="note_content"] {
+    background-color: var(--bg-light) !important;
+    color: var(--text-light) !important;
+    border-color: var(--border-light) !important;
+}
+
+/* NUEVA REGLA: Para los botones del selector de período en modo diurno */
+html:not(.dark) #period-selector a {
+    background-color: #e2e8f0; /* slate-200 */
+    color: var(--text-sec-light);
+}
+
+html:not(.dark) #period-selector a.active-period {
+    background-color: #0ea5e9; /* sky-500 */
+    color: #ffffff;
+}
+
