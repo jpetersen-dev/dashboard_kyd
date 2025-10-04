@@ -39,4 +39,3 @@ class Router {
         echo "Error 404: Página no encontrada.";
     }
 }
-

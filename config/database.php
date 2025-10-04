@@ -1,12 +1,11 @@
 <?php
 
-// Fichero de configuración para la conexión a la base de datos.
-// AHORA LEE LAS CREDENCIALES DESDE LAS VARIABLES DE ENTORNO DEL SERVIDOR.
-// Esto es más seguro y es la práctica estándar en plataformas como Render.
+// Fichero de configuración para la conexión a la base de datos PostgreSQL (Supabase).
+// Reemplaza los valores con tus credenciales reales.
 
-define('DB_HOST', getenv('DB_HOST'));
-define('DB_PORT', getenv('DB_PORT') ?: '5432'); // Puerto por defecto si no se define
-define('DB_NAME', getenv('DB_NAME'));
-define('DB_USER', getenv('DB_USER'));
-define('DB_PASS', getenv('DB_PASS'));
+define('DB_HOST', 'aws-1-sa-east-1.pooler.supabase.com');         // Ej: aws-0-us-west-1.pooler.supabase.com
+define('DB_PORT', '5432');                       // Generalmente es 5432
+define('DB_NAME', 'postgres');                   // Generalmente es 'postgres'
+define('DB_USER', 'postgres.gpiejgdiilkuiualcjgc');        // Tu usuario de Supabase
+define('DB_PASS', '4845nQt4z8AyAd$');  // Tu contraseña
 

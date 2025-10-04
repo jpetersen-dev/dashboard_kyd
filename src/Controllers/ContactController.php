@@ -6,6 +6,14 @@ use App\Models\Contact;
 
 class ContactController
 {
+    public function __construct()
+    {
+        // Protege todo el controlador.
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: /login');
+            exit();
+        }
+    }
     /**
      * Muestra la página de perfil detallado de un contacto.
      * @param string $id El id_contacto del usuario a mostrar.
