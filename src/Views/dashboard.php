@@ -43,6 +43,12 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 Crear Campaña
             </button>
+            <!-- NUEVO: Botón de Logout -->
+            <form action="/logout" method="POST">
+                <button type="submit" title="Cerrar Sesión" class="text-red-500 hover:bg-red-500/10 rounded-lg p-2.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                </button>
+            </form>
         </div>
     </header>
 
@@ -124,6 +130,38 @@
                     <h2 class="text-xl font-semibold text-dynamic-primary mb-2">Salud de la Base de Datos</h2>
                     <p class="text-sm text-dynamic-secondary mb-4">Composición de la lista de contactos.</p>
                     <div class="h-80"><canvas id="contactStatusChart"></canvas></div>
+                </div>
+            </div>
+
+            <!-- NUEVA SECCIÓN: Gestión de Invitaciones -->
+            <div class="card mb-8">
+                <h2 class="text-xl font-semibold text-dynamic-primary mb-4">Gestionar Invitaciones</h2>
+                <div class="space-y-4">
+                    <button id="generate-invitation-btn" class="w-full md:w-auto bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+                        Generar Nuevo Enlace de Invitación
+                    </button>
+                    <div id="invitations-list" class="space-y-2">
+                        <p class="text-sm text-dynamic-secondary font-semibold mt-6 mb-2">Enlaces Activos:</p>
+                        <?php if (!empty($activeInvitations)): ?>
+                            <?php foreach ($activeInvitations as $token):
+                                $url = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://" . $_SERVER['HTTP_HOST'];
+                                $link = $url . '/register/' . $token;
+                            ?>
+                                <div class="flex items-center gap-2 p-2 rounded-md bg-slate-100 dark:bg-slate-700/50" data-token="<?= $token ?>">
+                                    <input type="text" readonly value="<?= $link ?>" class="text-sm bg-transparent w-full focus:outline-none text-dynamic-secondary">
+                                    <button class="copy-link-btn p-2 rounded-md hover:bg-slate-200 dark:hover:bg-slate-600" title="Copiar enlace">
+                                        <svg class="w-4 h-4 text-dynamic-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                    </button>
+                                    <button class="delete-token-btn p-2 rounded-md hover:bg-red-500/10" title="Eliminar token">
+                                         <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                    </button>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <p id="no-invitations-msg" class="text-sm text-dynamic-secondary text-center py-4">No hay invitaciones activas.</p>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
 

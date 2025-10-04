@@ -4,14 +4,26 @@ namespace App\Controllers;
 
 use App\Models\Campaign;
 use App\Models\Contact;
+use App\Models\User; // <-- Se añade el modelo de User
 
 class DashboardController
 {
+    public function __construct()
+    {
+        // Este "constructor" se ejecuta antes que cualquier otro método.
+        // Protege todo el controlador.
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: /login');
+            exit();
+        }
+    }
+
     public function index()
     {
         // ... (El método index no cambia, sigue cargando todos los datos la primera vez) ...
         $campaignModel = new Campaign();
         $contactModel = new Contact();
+        $userModel = new User(); // <-- Se instancia el modelo de User
 
         $allCampaigns = $campaignModel->getAllCampaigns();
         

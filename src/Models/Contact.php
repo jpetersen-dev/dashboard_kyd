@@ -109,7 +109,7 @@ class Contact extends Database
                 FROM public.contacts_operational
                 GROUP BY estado_suscripcion
             ");
-            return $stmt->fetchAll();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC); // Se cambió a FETCH_ASSOC para consistencia
         } catch (\PDOException $e) {
             error_log('Error en getStatusDistribution: ' . $e->getMessage());
             return false;

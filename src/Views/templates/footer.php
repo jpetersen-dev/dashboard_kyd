@@ -98,6 +98,84 @@
             }
         });
     }
+
+     document.addEventListener('DOMContentLoaded', () => {
+        const generateBtn = document.getElementById('generate-invitation-btn');
+        const invitationsList = document.getElementById('invitations-list');
+
+        if (generateBtn) {
+            generateBtn.addEventListener('click', async () => {
+                generateBtn.disabled = true;
+                generateBtn.textContent = 'Generando...';
+
+                try {
+                    const response = await fetch('/invitations/create', { method: 'POST' });
+                    const result = await response.json();
+
+                    if (!response.ok) throw new Error(result.message);
+
+                    const token = result.token;
+                    const url = window.location.origin + '/register/' + token;
+                    
+                    // Eliminar el mensaje de "no hay invitaciones" si existe
+                    const noInvitationsMsg = document.getElementById('no-invitations-msg');
+                    if(noInvitationsMsg) noInvitationsMsg.remove();
+                    
+                    // Crear el nuevo elemento en la lista
+                    const newInvitationEl = document.createElement('div');
+                    newInvitationEl.className = 'flex items-center gap-2 p-2 rounded-md bg-slate-100 dark:bg-slate-700/50';
+                    newInvitationEl.setAttribute('data-token', token);
+                    newInvitationEl.innerHTML = `
+                        <input type="text" readonly value="${url}" class="text-sm bg-transparent w-full focus:outline-none text-dynamic-secondary">
+                        <button class="copy-link-btn p-2 rounded-md hover:bg-slate-200 dark:hover:bg-slate-600" title="Copiar enlace">
+                            <svg class="w-4 h-4 text-dynamic-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                        </button>
+                        <button class="delete-token-btn p-2 rounded-md hover:bg-red-500/10" title="Eliminar token">
+                             <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        </button>
+                    `;
+                    invitationsList.appendChild(newInvitationEl);
+
+                } catch (error) {
+                    alert('Error al generar el enlace: ' + error.message);
+                } finally {
+                    generateBtn.disabled = false;
+                    generateBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg> Generar Nuevo Enlace de Invitación';
+                }
+            });
+        }
+
+        // Delegación de eventos para los botones de copiar y borrar
+        invitationsList.addEventListener('click', async (e) => {
+            const copyBtn = e.target.closest('.copy-link-btn');
+            const deleteBtn = e.target.closest('.delete-token-btn');
+
+            if (copyBtn) {
+                const input = copyBtn.previousElementSibling;
+                navigator.clipboard.writeText(input.value).then(() => {
+                    copyBtn.title = '¡Copiado!';
+                    setTimeout(() => copyBtn.title = 'Copiar enlace', 2000);
+                });
+            }
+
+            if (deleteBtn) {
+                if (!confirm('¿Estás seguro de que quieres eliminar este enlace de invitación?')) return;
+
+                const row = deleteBtn.closest('[data-token]');
+                const token = row.dataset.token;
+
+                try {
+                    const response = await fetch(`/invitations/delete/${token}`, { method: 'POST' });
+                    const result = await response.json();
+                    if (!response.ok) throw new Error(result.message);
+                    row.remove(); // Eliminar el elemento del DOM
+                } catch (error) {
+                    alert('Error al eliminar el token: ' + error.message);
+                }
+            }
+        });
+    });
+    
 </script>
 </body>
 </html>
