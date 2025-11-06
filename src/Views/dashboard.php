@@ -1,12 +1,10 @@
 <?php require_once __DIR__ . '/templates/header.php'; ?>
 
 <div class="w-full px-4 sm:px-6 lg:px-8">
-    <!-- Cabecera del Dashboard -->
     <header class="flex flex-col md:flex-row justify-between items-start mb-8 gap-6">
-        <!-- Título y Selector de Campaña -->
         <div class="w-full md:w-auto">
              <div class="flex items-center gap-3 mb-4">
-                <img src="/assets/images/logo.svg" alt="KYD Logo" class="rounded-lg h-[140px] w-[140px]"/>
+                <img src="/assets/images/logo.svg" alt="KYD Logo" class="rounded-lg h-[90px] w-[90px]"/>
                 <div>
                     <h1 class="text-3xl font-bold text-dynamic-primary">Dashboard de Inteligencia</h1>
                     <p class="text-dynamic-secondary mt-1">
@@ -14,7 +12,6 @@
                     </p>
                 </div>
             </div>
-            <!-- Selector de Campañas -->
             <?php if (!empty($allCampaigns)): ?>
             <div class="w-full md:max-w-xs">
                 <label for="campaignSelector" class="text-sm font-medium text-dynamic-secondary">Seleccionar otra campaña</label>
@@ -33,7 +30,6 @@
             </div>
             <?php endif; ?>
         </div>
-        <!-- Botones de Acción -->
         <div class="flex items-center gap-4 w-full md:w-auto self-start md:self-center">
              <button id="theme-toggle" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-slate-700 focus:outline-none rounded-lg text-sm p-2.5">
                 <svg id="theme-toggle-moon" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
@@ -43,7 +39,6 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 Crear Campaña
             </button>
-            <!-- NUEVO: Botón de Logout -->
             <form action="/logout" method="POST">
                 <button type="submit" title="Cerrar Sesión" class="text-red-500 hover:bg-red-500/10 rounded-lg p-2.5">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -54,32 +49,39 @@
 
     <main>
         <?php if (!empty($kpis)): ?>
-            <!-- KPIs Principales -->
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 mb-8">
                 <div class="card"><p class="text-dynamic-secondary font-medium text-sm">Tasa de Apertura</p><p class="text-3xl font-bold text-sky-400 mt-2"><?= number_format($kpis['tasa_apertura'], 1) ?>%</p></div>
                 <div class="card"><p class="text-dynamic-secondary font-medium text-sm">Tasa de Clics (CTR)</p><p class="text-3xl font-bold text-emerald-400 mt-2"><?= number_format($kpis['tasa_clics_ctr'], 1) ?>%</p></div>
                 <div class="card"><p class="text-dynamic-secondary font-medium text-sm">Clics / Aperturas (CTOR)</p><p class="text-3xl font-bold text-violet-400 mt-2"><?= number_format($kpis['tasa_clics_ctor'], 1) ?>%</p></div>
                 <div class="card"><p class="text-dynamic-secondary font-medium text-sm">Total Enviados</p><p class="text-3xl font-bold text-dynamic-primary mt-2"><?= number_format($kpis['total_enviados']) ?></p></div>
                 <div class="card"><p class="text-dynamic-secondary font-medium text-sm">Tasa de Bajas</p><p class="text-3xl font-bold text-amber-400 mt-2"><?= number_format($kpis['tasa_bajas'], 1) ?>%</p></div>
-                <div class="card"><p class="text-dynamic-secondary font-medium text-sm">Rebotes</p><p class="text-3xl font-bold text-red-400 mt-2">N/A</p></div>
+                
+                <div class="card">
+                    <p class="text-dynamic-secondary font-medium text-sm">Tasa de Rebotes</p>
+                    <p class="text-3xl font-bold text-red-400 mt-2"><?= number_format($kpis['tasa_rebotes'], 1) ?>%</p>
+                </div>
             </div>
 
-            <!-- Gráfico de Tiempo y Top Leads -->
             <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
-                <div class="card xl:col-span-2">
+                <div class="card xl:col-span-2 relative">
                     <div class="flex flex-col sm:flex-row justify-between items-start mb-4">
                         <div>
                             <h2 class="text-xl font-semibold text-dynamic-primary">Interacciones en el Tiempo</h2>
                             <p class="text-sm text-dynamic-secondary">Aperturas y Clics durante el período seleccionado.</p>
                         </div>
                         <div class="flex items-center gap-2 mt-3 sm:mt-0 flex-wrap" id="period-selector">
-                            <a href="?campaign_id=<?= $selectedCampaignId ?>&period=today" class="px-3 py-1 text-sm rounded-md <?= $selectedPeriod == 'today' ? 'active-period' : '' ?>">Hoy</a>
-                            <a href="?campaign_id=<?= $selectedCampaignId ?>&period=7" class="px-3 py-1 text-sm rounded-md <?= $selectedPeriod == '7' ? 'active-period' : '' ?>">7d</a>
-                            <a href="?campaign_id=<?= $selectedCampaignId ?>&period=30" class="px-3 py-1 text-sm rounded-md <?= $selectedPeriod == '30' ? 'active-period' : '' ?>">30d</a>
-                            <a href="?campaign_id=<?= $selectedCampaignId ?>&period=90" class="px-3 py-1 text-sm rounded-md <?= $selectedPeriod == '90' ? 'active-period' : '' ?>">90d</a>
+                            <button data-period="today" class="period-btn px-3 py-1 text-sm rounded-md <?= $selectedPeriod == 'today' ? 'active-period' : '' ?>">Hoy</button>
+                            <button data-period="7" class="period-btn px-3 py-1 text-sm rounded-md <?= $selectedPeriod == '7' ? 'active-period' : '' ?>">7d</button>
+                            <button data-period="30" class="period-btn px-3 py-1 text-sm rounded-md <?= $selectedPeriod == '30' ? 'active-period' : '' ?>">30d</button>
+                            <button data-period="90" class="period-btn px-3 py-1 text-sm rounded-md <?= $selectedPeriod == '90' ? 'active-period' : '' ?>">90d</button>
                         </div>
                     </div>
-                    <div class="h-96"><canvas id="timeSeriesChart"></canvas></div>
+                    <div class="h-96 relative">
+                        <canvas id="timeSeriesChart"></canvas>
+                        <div id="chart-spinner" class="absolute inset-0 bg-white/50 dark:bg-slate-800/50 flex items-center justify-center hidden backdrop-blur-sm">
+                            <svg class="animate-spin h-8 w-8 text-sky-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        </div>
+                    </div>
                 </div>
                 <div class="card">
                     <h2 class="text-xl font-semibold text-dynamic-primary mb-2">Ranking (Top Leads)</h2>
@@ -105,8 +107,7 @@
                 </div>
             </div>
 
-            <!-- Gráficos de Interés -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 <div class="card">
                     <h2 class="text-xl font-semibold text-dynamic-primary mb-2">Interés por Rubro</h2>
                     <p class="text-sm text-dynamic-secondary mb-4">Sectores con mayor interacción.</p>
@@ -119,7 +120,6 @@
                 </div>
             </div>
 
-            <!-- Heatmap y Salud de la BD -->
             <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
                  <div class="card xl:col-span-2">
                     <h2 class="text-xl font-semibold text-dynamic-primary mb-2">Mejores Horarios de Interacción</h2>
@@ -133,11 +133,7 @@
                 </div>
             </div>
 
- 
-
-            <!-- Historiales en Tiempo Real -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <!-- Historial de Actividad Reciente -->
                 <div class="card">
                     <h2 class="text-xl font-semibold text-dynamic-primary mb-4">Registro de Actividad Reciente</h2>
                     <div class="space-y-4 h-96 overflow-y-auto pr-2">
@@ -167,7 +163,6 @@
                         <?php endif; ?>
                     </div>
                 </div>
-                <!-- Historial de Últimas Bajas -->
                 <div class="card">
                     <h2 class="text-xl font-semibold text-dynamic-primary mb-4">Últimas Bajas Registradas</h2>
                     <div class="space-y-4 h-96 overflow-y-auto pr-2">
@@ -205,7 +200,6 @@
     </main>
 </div>
 
-<!-- Ventana Modal para Crear Campaña -->
 <div id="campaignModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50 p-4">
     <div class="card p-8 rounded-lg shadow-xl w-full max-w-md">
         <h2 class="text-2xl font-bold text-dynamic-primary mb-4">Nueva Campaña</h2>
@@ -224,4 +218,3 @@
 </div>
 
 <?php require_once __DIR__ . '/templates/footer.php'; ?>
-
