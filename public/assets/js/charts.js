@@ -173,12 +173,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Gráfico de Interés por Región ---
-    const regionCtx = document.getElementById('regionChart')?.getContext('2d');
-    if (regionCtx && chartData.interestByRegion) {
-        const labels = chartData.interestByRegion.map(item => item.region);
-        const data = chartData.interestByRegion.map(item => item.total);
-        new Chart(regionCtx, {
+    // --- GRÁFICO MODIFICADO: Interés por Comuna ---
+    const communeCtx = document.getElementById('communeChart')?.getContext('2d');
+    if (communeCtx && chartData.interestByCommune) {
+        const labels = chartData.interestByCommune.map(item => item.comuna);
+        const data = chartData.interestByCommune.map(item => item.total);
+        new Chart(communeCtx, {
             type: 'bar',
             data: {
                 labels: labels,
@@ -188,13 +188,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Gráfico de Salud de la Base de Datos ---
+    // --- GRÁFICO MODIFICADO: Salud de la Base de Datos (CON COLORES CORREGIDOS) ---
     const contactStatusCtx = document.getElementById('contactStatusChart')?.getContext('2d');
     if (contactStatusCtx && chartData.contactStatus) {
         const labels = chartData.contactStatus.map(item => item.estado_suscripcion);
         const data = chartData.contactStatus.map(item => item.total);
 
-        // --- INICIO DE LA MODIFICACIÓN ---
         // 1. Definir el mapa de colores deseado
         const statusColorMap = {
             'activo': '#22c55e',       // Verde para activos
@@ -206,11 +205,9 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         // 2. Mapear las etiquetas (labels) a los colores
-        // Se usa toLowerCase() por si la BBDD devuelve "Activo" o "Baja"
         const backgroundColors = labels.map(label => 
             statusColorMap[label.toLowerCase()] || statusColorMap['default']
         );
-        // --- FIN DE LA MODIFICACIÓN ---
 
         new Chart(contactStatusCtx, {
             type: 'doughnut',
