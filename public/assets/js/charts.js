@@ -193,11 +193,34 @@ document.addEventListener('DOMContentLoaded', () => {
     if (contactStatusCtx && chartData.contactStatus) {
         const labels = chartData.contactStatus.map(item => item.estado_suscripcion);
         const data = chartData.contactStatus.map(item => item.total);
+
+        // --- INICIO DE LA MODIFICACIÓN ---
+        // 1. Definir el mapa de colores deseado
+        const statusColorMap = {
+            'activo': '#22c55e',       // Verde para activos
+            'activos': '#22c55e',      // Verde (alias por si acaso)
+            'baja': '#ef4444',         // Rojo para bajas
+            'bajas': '#ef4444',        // Rojo (alias por si acaso)
+            'rebotado_duro': '#f59e0b', // Ámbar para rebotes
+            'default': '#64748b'       // Gris/Slate para cualquier otro estado (ej: 'sin_confirmar')
+        };
+
+        // 2. Mapear las etiquetas (labels) a los colores
+        // Se usa toLowerCase() por si la BBDD devuelve "Activo" o "Baja"
+        const backgroundColors = labels.map(label => 
+            statusColorMap[label.toLowerCase()] || statusColorMap['default']
+        );
+        // --- FIN DE LA MODIFICACIÓN ---
+
         new Chart(contactStatusCtx, {
             type: 'doughnut',
             data: {
                 labels: labels,
-                datasets: [{ data: data, backgroundColor: ['#22c55e', '#f59e0b', '#ef4444', '#64748b'], borderWidth: 0 }]
+                datasets: [{ 
+                    data: data, 
+                    backgroundColor: backgroundColors, // <-- Usar el array dinámico
+                    borderWidth: 0 
+                }]
             },
             options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom', labels: { color: colors.textColor, boxWidth: 12, padding: 20 } } } }
         });
@@ -250,4 +273,3 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-
