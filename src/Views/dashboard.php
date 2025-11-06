@@ -113,12 +113,13 @@
                     <p class="text-sm text-dynamic-secondary mb-4">Sectores con mayor interacción.</p>
                     <div class="h-96"><canvas id="industryChart"></canvas></div>
                 </div>
+                
                 <div class="card">
-                    <h2 class="text-xl font-semibold text-dynamic-primary mb-2">Interés por Región</h2>
-                    <p class="text-sm text-dynamic-secondary mb-4">Regiones geográficas con mayor interacción.</p>
-                    <div class="h-96"><canvas id="regionChart"></canvas></div>
+                    <h2 class="text-xl font-semibold text-dynamic-primary mb-2">Interés por Comuna</h2>
+                    <p class="text-sm text-dynamic-secondary mb-4">Comunas con mayor interacción.</p>
+                    <div class="h-96"><canvas id="communeChart"></canvas></div>
                 </div>
-            </div>
+                </div>
 
             <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
                  <div class="card xl:col-span-2">
