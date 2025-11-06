@@ -277,33 +277,6 @@ class Campaign extends Database
         }
     }
 
-
-    /**
-     * Obtiene los datos de interés por región.
-     * @param string $campaignId
-     * @return array
-     */
-    public function getInterestByRegion(string $campaignId): array
-    {
-        try {
-            $sql = "
-                SELECT cm.region, COUNT(i.id) as total
-                FROM public.interactions_log i
-                JOIN public.contacts_master cm ON i.id_contacto = cm.id_contacto
-                WHERE i.campaign_id = :campaign_id AND cm.region IS NOT NULL AND cm.region <> ''
-                GROUP BY cm.region
-                ORDER BY total DESC
-                LIMIT 7;
-            ";
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute([':campaign_id' => $campaignId]);
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (\PDOException $e) {
-            error_log('Error en getInterestByRegion: ' . $e->getMessage());
-            return [];
-        }
-    }
-
     /**
      * NUEVA FUNCIÓN: Obtiene los datos de interés por comuna.
      * @param string $campaignId
@@ -330,7 +303,6 @@ class Campaign extends Database
         }
     }
     
-     
     /**
      * Obtiene las últimas interacciones (aperturas/clics) sin límite.
      * @param string $campaignId
