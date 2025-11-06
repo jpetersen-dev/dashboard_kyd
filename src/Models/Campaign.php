@@ -20,7 +20,7 @@ class Campaign extends Database
             $stmt = $this->db->prepare($sql);
             return $stmt->execute([':campaign_id' => $campaignId, ':nombre_campana' => $name]);
         } catch (\PDOException $e) {
-            error_log('Error al crear campaña: ' . $e->getMessage());
+            error_log('Error al crear campaña: ' ' . $e->getMessage());
             return false;
         }
     }
@@ -155,10 +155,9 @@ class Campaign extends Database
                     COALESCE(SUM(CASE WHEN i.tipo_interaccion = 'clic' THEN 1 ELSE 0 END), 0) AS clics
                 FROM date_series ds
                 LEFT JOIN public.interactions_log i 
-                    -- --- INICIO DE LA CORRECCIÓN DE ZONA HORARIA ---
-                    -- Se eliminó el "AT TIME ZONE 'UTC'" redundante
+                    -- --- CORRECCIÓN DE ZONA HORARIA ---
                     ON DATE(i.timestamp AT TIME ZONE 'America/Santiago') = ds.fecha 
-                    -- --- FIN DE LA CORRECCIÓN DE ZONA HORARIA ---
+                    -- --- FIN DE LA CORRECCIÓN ---
                     AND i.campaign_id = :campaign_id
                 GROUP BY ds.fecha
                 ORDER BY ds.fecha ASC;
@@ -182,19 +181,17 @@ class Campaign extends Database
         try {
             $sql = "
                 SELECT
-                    -- --- INICIO DE LA CORRECCIÓN DE ZONA HORARIA ---
-                    -- Se eliminó el "AT TIME ZONE 'UTC'" redundante
+                    -- --- CORRECCIÓN DE ZONA HORARIA ---
                     EXTRACT(HOUR FROM timestamp AT TIME ZONE 'America/Santiago') as hora,
-                    -- --- FIN DE LA CORRECCIÓN DE ZONA HORARIA ---
+                    -- --- FIN DE LA CORRECCIÓN ---
                     COUNT(CASE WHEN tipo_interaccion = 'apertura' THEN 1 END) AS aperturas,
                     COUNT(CASE WHEN tipo_interaccion = 'clic' THEN 1 END) AS clics
                 FROM public.interactions_log
                 WHERE
                     campaign_id = :campaign_id AND
-                    -- --- INICIO DE LA CORRECCIÓN DE ZONA HORARIA ---
-                    -- Se eliminó el "AT TIME ZONE 'UTC'" redundante
+                    -- --- CORRECCIÓN DE ZONA HORARIA ---
                     DATE(timestamp AT TIME ZONE 'America/Santiago') = CURRENT_DATE
-                    -- --- FIN DE LA CORRECCIÓN DE ZONA HORARIA ---
+                    -- --- FIN DE LA CORRECCIÓN ---
                 GROUP BY hora
                 ORDER BY hora ASC;
             ";
@@ -217,11 +214,10 @@ class Campaign extends Database
         try {
             $sql = "
                 SELECT
-                    -- --- INICIO DE LA CORRECCIÓN DE ZONA HORARIA ---
-                    -- Se eliminó el "AT TIME ZONE 'UTC'" redundante
+                    -- --- CORRECCIÓN DE ZONA HORARIA ---
                     EXTRACT(DOW FROM timestamp AT TIME ZONE 'America/Santiago') AS dia_semana,
                     EXTRACT(HOUR FROM timestamp AT TIME ZONE 'America/Santiago') AS hora_dia,
-                    -- --- FIN DE LA CORRECCIÓN DE ZONA HORARIA ---
+                    -- --- FIN DE LA CORRECCIÓN ---
                     COUNT(*) AS interacciones
                 FROM public.interactions_log
                 WHERE campaign_id = :campaign_id
@@ -348,7 +344,9 @@ class Campaign extends Database
      * @param string $campaignId
      * @return array
      */
-    publicfunction getLatestUnsubscribes(string $campaignId): array
+    // --- INICIO DE LA CORRECCIÓN DE TIPO (TYPO) ---
+    public function getLatestUnsubscribes(string $campaignId): array
+    // --- FIN DE LA CORRECCIÓN ---
     {
         try {
              $sql = "
