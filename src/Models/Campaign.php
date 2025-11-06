@@ -7,9 +7,11 @@ use PDO;
 
 class Campaign extends Database
 {
-    // ... create, getAllCampaigns, getKpis, getTopLeads, etc. se mantienen igual ...
-    // NOTE: All previous methods are unchanged and remain here. This file is complete.
-
+    /**
+     * Inserta una nueva campaña en la tabla 'campaigns'.
+     * @param string $name El nombre de la nueva campaña.
+     * @return bool True si la creación fue exitosa, false si falló.
+     */
     public function create(string $name): bool
     {
         try {
@@ -23,6 +25,10 @@ class Campaign extends Database
         }
     }
 
+    /**
+     * Obtiene una lista de todas las campañas para el selector como un array de objetos.
+     * @return array|false
+     */
     public function getAllCampaigns()
     {
         try {
@@ -34,29 +40,55 @@ class Campaign extends Database
         }
     }
 
+    /**
+     * CORREGIDO: La función ahora es más eficiente.
+     * Lee todos los contadores pre-calculados de la tabla 'campaigns' en una sola consulta.
+     */
     public function getKpis(string $campaignId)
     {
         try {
-            $stmt = $this->db->prepare("SELECT total_enviados, total_aperturas, total_clics FROM public.campaigns WHERE campaign_id = :campaign_id");
+            // Se leen todos los contadores de una sola vez
+            $stmt = $this->db->prepare("
+                SELECT 
+                    total_enviados, 
+                    total_aperturas, 
+                    total_clics, 
+                    total_bajas, 
+                    total_rebotes 
+                FROM public.campaigns 
+                WHERE campaign_id = :campaign_id
+            ");
             $stmt->execute([':campaign_id' => $campaignId]);
             $data = $stmt->fetch();
 
             if (!$data) return false;
 
+            // Se obtienen las aperturas únicas para las tasas (CTOR)
+            $stmt_opens_unique = $this->db->prepare("
+                SELECT COUNT(DISTINCT id_contacto) 
+                FROM public.interactions_log 
+                WHERE campaign_id = :campaign_id AND tipo_interaccion = 'apertura'
+            ");
+            $stmt_opens_unique->execute([':campaign_id' => $campaignId]);
+            $total_aperturas_unicas = $stmt_opens_unique->fetchColumn();
+
+            $enviados = (int)$data['total_enviados'];
+            $aperturas_unicas = (int)$total_aperturas_unicas;
+            
             $kpis = [
-                'total_enviados' => (int)$data['total_enviados'],
-                'total_aperturas' => (int)$data['total_aperturas'],
-                'total_clics' => (int)$data['total_clics'],
-                'tasa_apertura' => ($data['total_enviados'] > 0) ? ($data['total_aperturas'] / $data['total_enviados']) * 100 : 0,
-                'tasa_clics_ctr' => ($data['total_enviados'] > 0) ? ($data['total_clics'] / $data['total_enviados']) * 100 : 0,
-                'tasa_clics_ctor' => ($data['total_aperturas'] > 0) ? ($data['total_clics'] / $data['total_aperturas']) * 100 : 0,
+                'total_enviados'     => $enviados,
+                'total_aperturas'    => (int)$data['total_aperturas'], // Eventos totales de apertura
+                'total_clics'        => (int)$data['total_clics'],
+                'total_bajas'        => (int)$data['total_bajas'],
+                'total_rebotes'      => (int)$data['total_rebotes'],
+                
+                // --- TASAS ---
+                'tasa_apertura'   => ($enviados > 0) ? ($aperturas_unicas / $enviados) * 100 : 0, // Basada en usuarios únicos
+                'tasa_clics_ctr'  => ($enviados > 0) ? ((int)$data['total_clics'] / $enviados) * 100 : 0,
+                'tasa_clics_ctor' => ($aperturas_unicas > 0) ? ((int)$data['total_clics'] / $aperturas_unicas) * 100 : 0,
+                'tasa_bajas'      => ($enviados > 0) ? ((int)$data['total_bajas'] / $enviados) * 100 : 0,
+                'tasa_rebotes'    => ($enviados > 0) ? ((int)$data['total_rebotes'] / $enviados) * 100 : 0,
             ];
-
-            $stmt_bajas = $this->db->prepare("SELECT COUNT(DISTINCT sl.id_contacto) FROM public.sends_log sl JOIN public.contacts_operational co ON sl.id_contacto = co.id_contacto WHERE sl.campaign_id = :campaign_id AND co.estado_suscripcion = 'baja'");
-            $stmt_bajas->execute([':campaign_id' => $campaignId]);
-            $bajas = $stmt_bajas->fetchColumn();
-
-            $kpis['tasa_bajas'] = ($data['total_enviados'] > 0) ? ($bajas / $data['total_enviados']) * 100 : 0;
             
             return $kpis;
 
@@ -66,6 +98,11 @@ class Campaign extends Database
         }
     }
     
+    /**
+     * Obtiene el ranking de leads (empresas o contactos) con mayor puntuación.
+     * @param string $campaignId
+     * @return array|false
+     */
     public function getTopLeads(string $campaignId)
     {
         try {
@@ -84,7 +121,7 @@ class Campaign extends Database
             ";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([':campaign_id' => $campaignId]);
-            return $stmt->fetchAll();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
             error_log('Error al obtener Top Leads: ' . $e->getMessage());
             return false;
@@ -92,8 +129,11 @@ class Campaign extends Database
     }
     
     /**
-     * CORREGIDO: Ahora genera una serie de fechas completa para el período
-     * y une los datos de interacciones, rellenando los días vacíos con 0.
+     * Obtiene el recuento de interacciones (aperturas y clics) por día para un período determinado.
+     * Genera una serie de fechas completa para rellenar los días vacíos con 0.
+     * @param string $campaignId
+     * @param int $periodDays
+     * @return array
      */
     public function getInteractionsOverTime(string $campaignId, int $periodDays = 30): array
     {
@@ -122,13 +162,18 @@ class Campaign extends Database
             ";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([':campaign_id' => $campaignId]);
-            return $stmt->fetchAll();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
             error_log('Error en getInteractionsOverTime: ' . $e->getMessage());
             return [];
         }
     }
 
+    /**
+     * Obtiene las interacciones del día actual, agrupadas por hora.
+     * @param string $campaignId
+     * @return array
+     */
     public function getTodaysInteractionsByHour(string $campaignId): array
     {
         try {
@@ -153,6 +198,11 @@ class Campaign extends Database
         }
     }
 
+    /**
+     * Obtiene los datos para el mapa de calor de interacciones.
+     * @param string $campaignId
+     * @return array
+     */
     public function getInteractionHeatmap(string $campaignId): array
     {
         try {
@@ -168,13 +218,18 @@ class Campaign extends Database
             ";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([':campaign_id' => $campaignId]);
-            return $stmt->fetchAll();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
             error_log('Error en getInteractionHeatmap: ' . $e->getMessage());
             return [];
         }
     }
 
+    /**
+     * Obtiene los datos de interés por rubro.
+     * @param string $campaignId
+     * @return array
+     */
     public function getInterestByIndustry(string $campaignId): array
     {
         try {
@@ -189,13 +244,18 @@ class Campaign extends Database
             ";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([':campaign_id' => $campaignId]);
-            return $stmt->fetchAll();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
             error_log('Error en getInterestByIndustry: ' . $e->getMessage());
             return [];
         }
     }
 
+    /**
+     * Obtiene los datos de interés por región.
+     * @param string $campaignId
+     * @return array
+     */
     public function getInterestByRegion(string $campaignId): array
     {
         try {
@@ -210,13 +270,18 @@ class Campaign extends Database
             ";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([':campaign_id' => $campaignId]);
-            return $stmt->fetchAll();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
             error_log('Error en getInterestByRegion: ' . $e->getMessage());
             return [];
         }
     }
     
+    /**
+     * Obtiene las últimas interacciones (aperturas/clics) sin límite.
+     * @param string $campaignId
+     * @return array
+     */
     public function getLatestInteractions(string $campaignId): array
     {
         try {
@@ -233,13 +298,18 @@ class Campaign extends Database
             ";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([':campaign_id' => $campaignId]);
-            return $stmt->fetchAll();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
             error_log('Error en getLatestInteractions: ' . $e->getMessage());
             return [];
         }
     }
     
+    /**
+     * Obtiene los últimos contactos que se dieron de baja durante esta campaña, sin límite.
+     * @param string $campaignId
+     * @return array
+     */
     public function getLatestUnsubscribes(string $campaignId): array
     {
         try {
@@ -256,11 +326,10 @@ class Campaign extends Database
             ";
             $stmt = $this->db->prepare($sql);
             $stmt->execute([':campaign_id' => $campaignId]);
-            return $stmt->fetchAll();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\PDOException $e) {
             error_log('Error en getLatestUnsubscribes: ' . $e->getMessage());
             return [];
         }
     }
 }
-
