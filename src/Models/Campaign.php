@@ -20,7 +20,9 @@ class Campaign extends Database
             $stmt = $this->db->prepare($sql);
             return $stmt->execute([':campaign_id' => $campaignId, ':nombre_campana' => $name]);
         } catch (\PDOException $e) {
-            error_log('Error al crear campaña: ' ' . $e->getMessage());
+            // --- INICIO DE LA CORRECCIÓN (LÍNEA 38) ---
+            error_log('Error al crear campaña: ' . $e->getMessage());
+            // --- FIN DE LA CORRECCIÓN ---
             return false;
         }
     }
@@ -344,9 +346,7 @@ class Campaign extends Database
      * @param string $campaignId
      * @return array
      */
-    // --- INICIO DE LA CORRECCIÓN DE TIPO (TYPO) ---
     public function getLatestUnsubscribes(string $campaignId): array
-    // --- FIN DE LA CORRECCIÓN ---
     {
         try {
              $sql = "
