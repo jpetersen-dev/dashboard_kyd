@@ -58,7 +58,12 @@ class DashboardController
         $latestUnsubscribes = $campaignModel->getLatestUnsubscribes($selectedCampaignId);
         $contactStatus = $contactModel->getStatusDistribution();
         $interestByIndustry = $campaignModel->getInterestByIndustry($selectedCampaignId);
-        $interestByRegion = $campaignModel->getInterestByRegion($selectedCampaignId);
+        
+        // --- MODIFICACIÓN AQUÍ ---
+        // Se reemplaza getInterestByRegion por getInterestByCommune
+        $interestByCommune = $campaignModel->getInterestByCommune($selectedCampaignId);
+        // --- FIN DE LA MODIFICACIÓN ---
+
         $interactionHeatmap = $campaignModel->getInteractionHeatmap($selectedCampaignId);
         
         $chartJSData = [
@@ -66,7 +71,13 @@ class DashboardController
             'interactionsOverTime' => $interactionsOverTime,
             'interactionHeatmap' => $interactionHeatmap,
             'interestByIndustry' => $interestByIndustry,
-            'interestByRegion' => $interestByRegion,
+            
+            // --- MODIFICACIÓN AQUÍ ---
+            // Se pasa el nuevo dato de comunas
+            'interestByCommune' => $interestByCommune,
+            // 'interestByRegion' => $interestByRegion, // Línea original eliminada/comentada
+            // --- FIN DE LA MODIFICACIÓN ---
+
             'selectedPeriod' => $selectedPeriod,
             'selectedCampaignId' => $selectedCampaignId,
         ];
@@ -116,4 +127,3 @@ class DashboardController
         }
     }
 }
-
