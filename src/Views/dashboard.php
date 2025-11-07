@@ -96,8 +96,14 @@
                                             <?= htmlspecialchars($lead['contacto_empresa']) ?>
                                         </a>
                                     </td>
-                                    <td class="p-3 text-center font-bold text-emerald-400"><?= $lead['puntuacion_total'] ?></td>
-                                </tr>
+
+                                    <?php 
+                                        $scoreColor = ($lead['estado_suscripcion'] == 'baja') 
+                                            ? 'text-red-400' 
+                                            : 'text-emerald-400';
+                                    ?>
+                                    <td class="p-3 text-center font-bold <?= $scoreColor ?>"><?= $lead['puntuacion_total'] ?></td>
+                                    </tr>
                                 <?php endforeach; else: ?>
                                 <tr><td colspan="2" class="text-center p-4 text-dynamic-secondary">No hay datos de leads.</td></tr>
                                 <?php endif; ?>
@@ -113,13 +119,12 @@
                     <p class="text-sm text-dynamic-secondary mb-4">Sectores con mayor interacción.</p>
                     <div class="h-96"><canvas id="industryChart"></canvas></div>
                 </div>
-                
                 <div class="card">
                     <h2 class="text-xl font-semibold text-dynamic-primary mb-2">Interés por Comuna</h2>
                     <p class="text-sm text-dynamic-secondary mb-4">Comunas con mayor interacción.</p>
                     <div class="h-96"><canvas id="communeChart"></canvas></div>
                 </div>
-                </div>
+            </div>
 
             <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
                  <div class="card xl:col-span-2">
