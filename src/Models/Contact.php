@@ -19,7 +19,11 @@ class Contact extends Database
                 SELECT 
                     cm.id_contacto, cm.nombre_contacto, cm.telefono_1, cm.cargo, cm.email,
                     cm.direccion, cm.comuna, cm.region, cm.empresa_razon_social,
-                    op.rubro
+                    
+                    -- --- INICIO DE LA MODIFICACIÓN ---
+                    op.rubro, op.estado_suscripcion
+                    -- --- FIN DE LA MODIFICACIÓN ---
+
                 FROM public.contacts_master cm
                 LEFT JOIN public.contacts_operational op ON cm.id_contacto = op.id_contacto
                 WHERE cm.id_contacto = :id_contacto
@@ -116,4 +120,3 @@ class Contact extends Database
         }
     }
 }
-
