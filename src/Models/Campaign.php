@@ -20,9 +20,7 @@ class Campaign extends Database
             $stmt = $this->db->prepare($sql);
             return $stmt->execute([':campaign_id' => $campaignId, ':nombre_campana' => $name]);
         } catch (\PDOException $e) {
-            // --- INICIO DE LA CORRECCIÓN (LÍNEA 38) ---
             error_log('Error al crear campaña: ' . $e->getMessage());
-            // --- FIN DE LA CORRECCIÓN ---
             return false;
         }
     }
@@ -113,11 +111,20 @@ class Campaign extends Database
                     op.id_contacto,
                     COALESCE(NULLIF(op.nombre_empresa, ''), op.nombre_contacto) AS contacto_empresa,
                     op.rubro,
+                    
+                    -- --- INICIO DE LA MODIFICACIÓN ---
+                    op.estado_suscripcion,
+                    -- --- FIN DE LA MODIFICACIÓN ---
+
                     SUM(i.puntuacion_lead) AS puntuacion_total
                 FROM public.interactions_log i
                 JOIN public.contacts_operational op ON i.id_contacto = op.id_contacto
                 WHERE i.campaign_id = :campaign_id
-                GROUP BY op.id_contacto, contacto_empresa, op.rubro
+
+                -- --- INICIO DE LA MODIFICACIÓN ---
+                GROUP BY op.id_contacto, contacto_empresa, op.rubro, op.estado_suscripcion
+                -- --- FIN DE LA MODIFICACIÓN ---
+                
                 ORDER BY puntuacion_total DESC
                 LIMIT 15;
             ";
@@ -157,9 +164,7 @@ class Campaign extends Database
                     COALESCE(SUM(CASE WHEN i.tipo_interaccion = 'clic' THEN 1 ELSE 0 END), 0) AS clics
                 FROM date_series ds
                 LEFT JOIN public.interactions_log i 
-                    -- --- CORRECCIÓN DE ZONA HORARIA ---
                     ON DATE(i.timestamp AT TIME ZONE 'America/Santiago') = ds.fecha 
-                    -- --- FIN DE LA CORRECCIÓN ---
                     AND i.campaign_id = :campaign_id
                 GROUP BY ds.fecha
                 ORDER BY ds.fecha ASC;
@@ -183,17 +188,13 @@ class Campaign extends Database
         try {
             $sql = "
                 SELECT
-                    -- --- CORRECCIÓN DE ZONA HORARIA ---
                     EXTRACT(HOUR FROM timestamp AT TIME ZONE 'America/Santiago') as hora,
-                    -- --- FIN DE LA CORRECCIÓN ---
                     COUNT(CASE WHEN tipo_interaccion = 'apertura' THEN 1 END) AS aperturas,
                     COUNT(CASE WHEN tipo_interaccion = 'clic' THEN 1 END) AS clics
                 FROM public.interactions_log
                 WHERE
                     campaign_id = :campaign_id AND
-                    -- --- CORRECCIÓN DE ZONA HORARIA ---
                     DATE(timestamp AT TIME ZONE 'America/Santiago') = CURRENT_DATE
-                    -- --- FIN DE LA CORRECCIÓN ---
                 GROUP BY hora
                 ORDER BY hora ASC;
             ";
@@ -216,10 +217,8 @@ class Campaign extends Database
         try {
             $sql = "
                 SELECT
-                    -- --- CORRECCIÓN DE ZONA HORARIA ---
                     EXTRACT(DOW FROM timestamp AT TIME ZONE 'America/Santiago') AS dia_semana,
                     EXTRACT(HOUR FROM timestamp AT TIME ZONE 'America/Santiago') AS hora_dia,
-                    -- --- FIN DE LA CORRECCIÓN ---
                     COUNT(*) AS interacciones
                 FROM public.interactions_log
                 WHERE campaign_id = :campaign_id
