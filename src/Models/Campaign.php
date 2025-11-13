@@ -111,20 +111,16 @@ class Campaign extends Database
                     op.id_contacto,
                     COALESCE(NULLIF(op.nombre_empresa, ''), op.nombre_contacto) AS contacto_empresa,
                     op.rubro,
-                    
-                    -- --- INICIO DE LA MODIFICACIÓN ---
                     op.estado_suscripcion,
-                    -- --- FIN DE LA MODIFICACIÓN ---
-
                     SUM(i.puntuacion_lead) AS puntuacion_total
                 FROM public.interactions_log i
                 JOIN public.contacts_operational op ON i.id_contacto = op.id_contacto
-                WHERE i.campaign_id = :campaign_id
-
+                
                 -- --- INICIO DE LA MODIFICACIÓN ---
-                GROUP BY op.id_contacto, contacto_empresa, op.rubro, op.estado_suscripcion
+                WHERE i.campaign_id = :campaign_id AND op.estado_suscripcion <> 'baja'
                 -- --- FIN DE LA MODIFICACIÓN ---
                 
+                GROUP BY op.id_contacto, contacto_empresa, op.rubro, op.estado_suscripcion
                 ORDER BY puntuacion_total DESC
                 LIMIT 15;
             ";
